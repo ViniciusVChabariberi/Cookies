@@ -1,194 +1,101 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['accept_cookies'])) {
-        $nome = "cookie";
-        $valor = "Vinicius";
-        $tempo = time() + 300; // 5 minutos
-        setcookie($nome, $valor, $tempo);
-    }
-
-    if (isset($_POST['reject_cookies'])) {
-        echo "Cookie rejeitado";
-    }
-}
-
-// Move o código PHP para o início
-if (isset($_COOKIE["cookie"])) {
-    $nome_usuario = $_COOKIE["cookie"];
-    echo "Bem-vindo, $nome_usuario!";
+// Contador de visitas
+if(isset($_COOKIE['visit_count'])) {
+    $visit_count = $_COOKIE['visit_count'] + 1;
 } else {
-    echo "Cookie não encontrado.";
+    $visit_count = 1;
 }
 
-if (isset($_COOKIE['cookie_consent'])) {
-    $cookieStatus = $_COOKIE['cookie_consent'];
+// Mudar cor
+if(isset($_COOKIE['background_color'])) {
+    $background_color = $_COOKIE['background_color'];
 } else {
-    $cookieStatus = 'undefined';
+    $background_color = '#ffffff'; // Cor padrão (branco)
+}
+if(isset($_POST['color'])) {
+    $background_color = $_POST['color'];
+    setcookie('background_color', $background_color, time() + 200); // expira em 2 minutos
 }
 
-// Emite variáveis JavaScript
-echo '<script>';
-echo 'var preferredLanguage = "' . getPreferredLanguage() . '";';
-echo 'var preferredColor = "' . getPreferredColor() . '";';
-echo '</script>';
+// Mudar idioma
+if(isset($_COOKIE['language'])) {
+    $language = $_COOKIE['language'];
+} else {
+    $language = 'en'; // Idioma padrão: inglês
+}
+ 
+if(isset($_GET['lang'])) {
+    $language = $_GET['lang'];
+    setcookie('language', $language, time() + 30); // expira em 30 segundos
+}
+ 
+// Conjunto de traduções
+$translations = [
+    'en' => [
+        'title' => 'Change Language',
+        'current_language' => 'Current Language: English',
+        'select_language' => 'Select a Language:',
+        'update_language' => 'Update Language',
+    ],
+    'pt' => [
+        'title' => 'Mudar Idioma',
+        'current_language' => 'Idioma Atual: Português',
+        'select_language' => 'Selecione um Idioma:',
+        'update_language' => 'Atualizar Idioma',
+    ],
+];
+ 
+$translation = $translations[$language];
+
+setcookie('visit_count', $visit_count, time() + 30); // expira em 30 segundos
 ?>
-
+ 
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../Cookies/assets/style.css">
     <title>Cookies</title>
+    <style>
+        body {
+            background-color: <?php echo $background_color; ?>;
+        }
+    </style>
 </head>
-
 <body>
-    <?php
-    if ($cookieStatus === 'undefined') {
-    ?>
-        <div class="container text-center">
-            <div class="row">
-                <div class="col">
-                    --
-                </div>
-                <div class="col-6">
-                    Trabalhando com Cookies!
-                </div>
-                <div class="col">
-                    --
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <form method="post">
-                        <button type="submit" name="accept_cookies">Aceitar Cookies</button>
-                    </form>
-                </div>
-                <div class="col-5">
-                    <a class="link" href="politica.php">É importante que o site tenha políticas de acordo com o Regulamento Geral de Proteção de Dados (GDPR).</a>
-                </div>
-                <div class="col">
-                    <form method="post">
-                        <button type="submit" name="reject_cookies">Rejeitar Cookies</button>
-                    </form>
-                </div>
-            </div>
-            <script>
-                // Remove a chamada para location.reload()
+    <h1 class="title">Explorando o Mundo dos Cookies na Programação Web: Uma Abordagem Prática</h1>
 
-                // Aplica a preferência de idioma ao carregar a página
-                setLanguagePreference(preferredLanguage);
+    <h2>Contador de Visitas</h2>
+    <p>Você visitou esta página <?php echo $visit_count; ?> vezes.</p>
+    <br>
+    <h2>Mudar Cor da Tela</h2>
+    <p>Cor atual da tela: <?php echo $background_color; ?></p>
 
-                // Aplica a preferência de cor ao carregar a página
-                applyColorPreference(preferredColor);
-            </script>
-        </div>
-    <?php
-    } else {
-    ?>
-        <div class="row">
-            <div class="col">
-                funções:
-            </div>
-            <div class="col-6">
-                Trocar a linguagem
+    <form method="post" action="">
+        <label for="color">Escolha uma nova cor:</label>
+        <input type="color" id="color" name="color">
+        <input type="submit" value="Atualizar Cor">
+    </form>
+    <br>
+    <h2><?php echo $translation['title']; ?></h2>
+    <p><?php echo $translation['current_language']; ?></p>
+ 
+    <form method="get" action="">
+        <label for="lang"><?php echo $translation['select_language']; ?></label>
+        <select id="lang" name="lang">
+            <option value="en" <?php echo ($language === 'en') ? 'selected' : ''; ?>>English</option>
+            <option value="pt" <?php echo ($language === 'pt') ? 'selected' : ''; ?>>Português</option>
+        </select>
+        <input type="submit" value="<?php echo $translation['update_language']; ?>">
+    </form>
 
-                <label for="languageSelect">Escolha o Idioma:</label>
-                <select id="languageSelect" onchange="changeLanguage()">
-                    <option value="en">Inglês</option>
-                    <option value="pt">Português</option>
-                    <!-- Adicione mais opções conforme necessário -->
-                </select>
-
-                <script>
-                    function changeLanguage() {
-                        var selectedLanguage = document.getElementById("languageSelect").value;
-                        setLanguagePreference(preferredLanguage);
-                        location.reload(); // Recarrega a página para aplicar a mudança imediatamente
-                    }
-
-                    function setLanguagePreference(language) {
-                        document.cookie = "language=" + language + "; path=/";
-                    }
-                    <?php
-                    function getPreferredLanguage()
-                    {
-                        if (isset($_COOKIE['language'])) {
-                            return $_COOKIE['language'];
-                        } else {
-                            return 'en';
-                        }
-                    }
-
-                    $preferredLanguage = getPreferredLanguage();
-                    echo "Idioma Preferido: $preferredLanguage";
-                    ?>
-                </script>
-            </div>
-
-            <div class="col">
-                <label for="colorSelect">Trocar a Cor:</label>
-                <select id="colorSelect" onchange="changeColor()">
-                    <option value="default">Padrão</option>
-                    <option value="blue">Azul</option>
-                    <option value="green">Verde</option>
-                    <option value="red">Vermelho</option>
-                    <!-- Adicione mais opções conforme necessário -->
-                </select>
-
-                <script>
-                    function changeColor() {
-                        var selectedColor = document.getElementById("colorSelect").value;
-                        setColorPreference(selectedColor);
-                        applyColorPreference(preferredColor);
-                    }
-
-                    function setColorPreference(color) {
-                        document.cookie = "site_color=" + color + "; path=/";
-                    }
-
-                    function applyColorPreference(color) {
-                        var colorStyles = document.getElementById("colorStyles");
-                        colorStyles.innerHTML = `
-                        body {
-                            background-color: ${color === 'default' ? 'white' : color};
-                        } `;
-                    }
-
-                    // Aplica a preferência de cor ao carregar a página
-                    var savedColorPreference = getCookie("site_color");
-                    if (savedColorPreference) {
-                        applyColorPreference(savedColorPreference);
-                    }
-
-                    // Função para obter o valor de um cookie
-                    function getCookie(name) {
-                        var match = document.cookie.match(new RegExp(name + '=([^;]+)'));
-                        return match ? match[1] : null;
-                    }
-
-                    <?php
-                    function getPreferredColor()
-                    {
-                        if (isset($_COOKIE['site_color'])) {
-                            return $_COOKIE['site_color'];
-                        } else {
-                            return 'default';
-                        }
-                    }
-
-                    $preferredColor = getPreferredColor();
-                    echo "Cor Preferida: $preferredColor"; ?>
-                </script>
-            </div>
-        </div>
-    <?php
-    }
-    ?>
+    <footer>
+    <p class="texto"> Este trabalho mergulha no fascinante universo da programação com cookies, 
+    destacando sua utilidade na persistência de dados em aplicações web. 
+    Descubra como esses pequenos arquivos de texto desempenham um papel crucial na personalização da experiência do usuário. 
+    Para garantir uma compreensão abrangente das práticas de segurança e proteção de dados, 
+    consulte nossas <a class="link" href="politica.php">políticas de segurança</a> para obter informações detalhadas sobre a privacidade e a integridade dos dados.</p>
+    </footer>
 </body>
-
 </html>
